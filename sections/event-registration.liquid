@@ -1,8 +1,8 @@
 {%- assign p = product -%}
 {%- if p == blank -%}
-  {%- assign _handle_from_url = request.path | split: '/products/' | last | split: '?' | first | split: '/' | first -%}
-  {%- if _handle_from_url -%}
-    {%- assign p = all_products[_handle_from_url] -%}
+  {%- assign handle_from_url = request.path | split: '/products/' | last | split: '?' | first | split: '/' | first -%}
+  {%- if handle_from_url -%}
+    {%- assign p = all_products[handle_from_url] -%}
   {%- endif -%}
 {%- endif -%}
 {%- if section.settings.alt_product -%}
@@ -24,13 +24,17 @@
 <div class="x-event" data-section-id="{{ section.id }}" lang="uk">
   <div class="x-event__media">
     {%- if p.featured_image -%}
-      <img class="x-event__image" src="{{ p.featured_image | image_url: width: 600 }}" alt="{{ p.featured_image.alt | escape }}">
+      {%- assign _feat_width = 600 -%}
+      {%- assign _feat_height = _feat_width | divided_by: p.featured_image.aspect_ratio | round -%}
+      <img class="x-event__image" src="{{ p.featured_image | image_url: width: 600 }}" alt="{{ p.featured_image.alt | escape }}" width="{{ _feat_width }}" height="{{ _feat_height }}">
     {%- endif -%}
     {%- if p.images.size > 1 -%}
       <div class="x-event__thumbnails" role="list">
         {%- for img in p.images -%}
+          {%- assign _thumb_w = 120 -%}
+          {%- assign _thumb_h = _thumb_w | divided_by: img.aspect_ratio | round -%}
           <button type="button" class="x-event__thumb" role="listitem" aria-label="Мініатюра {{ forloop.index }}" data-image="{{ img | image_url: width: 600 }}">
-            <img src="{{ img | image_url: width: 120 }}" alt="{{ img.alt | escape }}">
+            <img src="{{ img | image_url: width: 120 }}" alt="{{ img.alt | escape }}" width="{{ _thumb_w }}" height="{{ _thumb_h }}">
           </button>
         {%- endfor -%}
       </div>
