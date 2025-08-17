@@ -1,5 +1,10 @@
 name: CI
-on: [push]
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   theme-check:
     name: Theme Check
@@ -9,4 +14,4 @@ jobs:
       - name: Theme Check
         uses: shopify/theme-check-action@v2
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
