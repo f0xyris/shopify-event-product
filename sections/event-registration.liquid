@@ -1,0 +1,192 @@
+{%- assign p = product -%}
+{%- if p == blank -%}
+  {%- assign _handle_from_url = request.path | split: '/products/' | last | split: '?' | first | split: '/' | first -%}
+  {%- if _handle_from_url -%}
+    {%- assign p = all_products[_handle_from_url] -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if section.settings.alt_product -%}
+  {%- assign p = section.settings.alt_product -%}
+{%- endif -%}
+
+{{ 'custom-event-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-event-product.js' | asset_url }}" defer></script>
+
+{%- if p == blank -%}
+  <div class="x-event x-event--error">
+    <div class="x-event__content">
+      <div class="x-event__errors" aria-live="polite">Розділ доступний лише на сторінці товару або при виборі товару в налаштуваннях секції.</div>
+    </div>
+  </div>
+  {%- endif -%}
+
+{%- unless p == blank -%}
+<div class="x-event" data-section-id="{{ section.id }}" lang="uk">
+  <div class="x-event__media">
+    {%- if p.featured_image -%}
+      <img class="x-event__image" src="{{ p.featured_image | image_url: width: 600 }}" alt="{{ p.featured_image.alt | escape }}">
+    {%- endif -%}
+    {%- if p.images.size > 1 -%}
+      <div class="x-event__thumbnails" role="list">
+        {%- for img in p.images -%}
+          <button type="button" class="x-event__thumb" role="listitem" aria-label="Мініатюра {{ forloop.index }}" data-image="{{ img | image_url: width: 600 }}">
+            <img src="{{ img | image_url: width: 120 }}" alt="{{ img.alt | escape }}">
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="x-event__content">
+    <div class="x-event__errors" aria-live="polite"></div>
+
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'title' -%}
+          <div class="x-event__block x-event__block--title" {{ block.shopify_attributes }}>
+            <h1 class="x-event__title">{{ p.title }}</h1>
+          </div>
+
+        {%- when 'description' -%}
+          <div class="x-event__block x-event__block--description" {{ block.shopify_attributes }}>
+            <div class="x-event__description" data-x-desc>{{ p.description }}</div>
+            <button class="x-event__desc-toggle" type="button" aria-expanded="false">Читати повністю</button>
+          </div>
+
+        {%- when 'price' -%}
+          <div class="x-event__block x-event__block--price" {{ block.shopify_attributes }}>
+            <div class="x-event__price" data-initial="{{ p.price | json }}"></div>
+          </div>
+
+        {%- when 'variant_selector' -%}
+          <div class="x-event__block x-event__block--variants" {{ block.shopify_attributes }}>
+            <div class="x-event__options">
+              <div class="x-event__field" data-option-wrapper="0">
+                <label class="x-event__label" for="x-event-option-0">Код</label>
+                <select class="x-event__select" id="x-event-option-0" data-option-index="0" aria-label="Код"></select>
+              </div>
+              <div class="x-event__field" data-option-wrapper="1">
+                <label class="x-event__label" for="x-event-option-1">День</label>
+                <select class="x-event__select" id="x-event-option-1" data-option-index="1" aria-label="День"></select>
+              </div>
+              <div class="x-event__field" data-option-wrapper="2">
+                <label class="x-event__label" for="x-event-option-2">Час</label>
+                <select class="x-event__select" id="x-event-option-2" data-option-index="2" aria-label="Час"></select>
+              </div>
+            </div>
+          </div>
+
+        {%- when 'personal_form' -%}
+          <div class="x-event__block x-event__block--form" {{ block.shopify_attributes }}>
+            <button class="x-event__form-toggle" type="button" aria-expanded="false" aria-controls="x-event-form-{{ section.id }}">Дані учасника</button>
+            <form class="x-event__form" id="x-event-form-{{ section.id }}" novalidate>
+              <div class="x-event__form-grid">
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-first-name">Ім’я</label>
+                  <input class="x-event__input" type="text" id="x-event-first-name" name="first_name" autocomplete="given-name" required>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-last-name">Прізвище</label>
+                  <input class="x-event__input" type="text" id="x-event-last-name" name="last_name" autocomplete="family-name" required>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-email">Імейл адреса</label>
+                  <input class="x-event__input" type="email" id="x-event-email" name="email" autocomplete="email" required>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-phone">Номер телефону</label>
+                  <input class="x-event__input" type="tel" id="x-event-phone" name="phone" autocomplete="tel" inputmode="tel" pattern="^[0-9+()\-\s]{6,}$" required>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-postal">Поштовий код</label>
+                  <input class="x-event__input" type="text" id="x-event-postal" name="postal_code" autocomplete="postal-code" required>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-birth">Дата народження</label>
+                  <input class="x-event__input" type="date" id="x-event-birth" name="birth_date" lang="uk" required>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-gender">Гендер</label>
+                  <select class="x-event__input" id="x-event-gender" name="gender" required>
+                    <option value="" selected>Оберіть</option>
+                    <option value="Чоловік">Чоловік</option>
+                    <option value="Жінка">Жінка</option>
+                    <option value="Інше">Інше</option>
+                    <option value="Не вказувати">Не вказувати</option>
+                  </select>
+                </div>
+                <div class="x-event__field">
+                  <label class="x-event__label" for="x-event-user-code">Код користувача (необов’язково)</label>
+                  <input class="x-event__input" type="text" id="x-event-user-code" name="user_code" autocomplete="off">
+                </div>
+              </div>
+            </form>
+          </div>
+
+        {%- when 'checkout_button' -%}
+          <div class="x-event__block x-event__block--checkout" {{ block.shopify_attributes }}>
+            <button class="x-event__checkout" type="button" disabled>Перейти до оплати</button>
+          </div>
+      {%- endcase -%}
+    {%- endfor -%}
+
+    <script type="application/json" data-x-event-product>
+      {
+        "product_id": {{ p.id | json }},
+        "title": {{ p.title | json }},
+        "featured_image": {% if p.featured_image %}{{ p.featured_image | image_url: width: 600 | json }}{% else %}null{% endif %},
+        "options_with_values": {{ p.options_with_values | json }},
+        "variants": [
+          {%- for v in p.variants -%}
+          {
+            "id": {{ v.id | json }},
+            "available": {{ v.available | json }},
+            "price": {{ v.price | json }},
+            "compare_at_price": {{ v.compare_at_price | json }},
+            "options": {{ v.options | json }},
+            "image": {%- if v.image -%}{{ v.image | image_url: width: 600 | json }}{%- else -%}null{%- endif -%}
+          }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+        ],
+        "money_format": {{ shop.money_format | json }}
+      }
+    </script>
+  </div>
+</div>
+
+{%- endunless -%}
+
+{%- schema -%}
+{
+  "name": "Event Registration",
+  "settings": [
+    { "type": "product", "id": "alt_product", "label": "Альтернативний товар" }
+  ],
+  "blocks": [
+    { "type": "title", "name": "Заголовок", "settings": [ {"type":"text","id":"heading","label":"Внутрішня назва (необов'язково)"} ] },
+    { "type": "description", "name": "Опис", "settings": [ {"type":"text","id":"heading","label":"Внутрішня назва (необов'язково)"} ] },
+    { "type": "price", "name": "Ціна", "settings": [ {"type":"text","id":"heading","label":"Внутрішня назва (необов'язково)"} ] },
+    { "type": "variant_selector", "name": "Вибір варіантів", "settings": [ {"type":"text","id":"heading","label":"Внутрішня назва (необов'язково)"} ] },
+    { "type": "personal_form", "name": "Форма даних", "settings": [ {"type":"text","id":"heading","label":"Внутрішня назва (необов'язково)"} ] },
+    { "type": "checkout_button", "name": "Кнопка оплати", "settings": [ {"type":"text","id":"heading","label":"Внутрішня назва (необов'язково)"} ] }
+  ],
+  "presets": [
+    {
+      "name": "Event Registration",
+      "category": "Product",
+      "blocks": [
+        {"type":"title"},
+        {"type":"description"},
+        {"type":"price"},
+        {"type":"variant_selector"},
+        {"type":"personal_form"},
+        {"type":"checkout_button"}
+      ]
+    }
+  ]
+}
+{%- endschema -%}
+{%- javascript -%}{%- endjavascript -%}
+{%- style -%}{%- endstyle -%}
+
+
